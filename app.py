@@ -1,21 +1,68 @@
 # app.py
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, Response
 import json
 import os
 from datetime import datetime
 import threading
+from queue import Queue
 
 app = Flask(__name__,
             template_folder='templates',
             static_folder='static')
 
-# File paths
+# File path
 LEADERBOARD_FILE = os.path.join(os.path.dirname(__file__), 'leaderboard.json')
 
-# Thread lock to prevent race conditions on JSON writes
+# Thread-safe lock for file operations
 leaderboard_lock = threading.Lock()
 
-# All 21 questions (hardcoded)
+# In-memory leaderboard (loaded from JSON)
+leaderboard = []
+
+# SSE clients queue (for realtime updates)
+clients = set()
+
+def load_leaderboard():
+    global leaderboard
+    if not os.path.exists(LEADERBOARD_FILE):
+        # Auto-create empty leaderboard file
+        with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
+            json.dump([], f, ensure_ascii=False, indent=2)
+        leaderboard = []
+        return
+
+    try:
+        with open(LEADERBOARD_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            # Sort: highest score first, then lowest time
+            data.sort(key=lambda x: (-x['score'], x['time_sec']))
+            leaderboard = data
+    except Exception as e:
+        print(f"Leaderboard load error: {e}")
+        leaderboard = []
+
+def save_leaderboard():
+    with leaderboard_lock:
+        try:
+            with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
+                json.dump(leaderboard, f, ensure_ascii=False, indent=2)
+            # Notify all connected clients
+            broadcast_leaderboard()
+        except Exception as e:
+            print(f"Save error: {e}")
+
+def broadcast_leaderboard():
+    """Send updated leaderboard to all SSE clients"""
+    for client in list(clients):
+        try:
+            client.put(json.dumps({"leaderboard": leaderboard}))
+        except:
+            clients.discard(client)
+
+# Load leaderboard at startup
+load_leaderboard()
+
+# All 21 questions
 QUESTIONS = [
     {"q": "রাসূল ﷺ এর পুরো নাম কী?", "options": ["আহমদ ইবনে আব্দুল্লাহ", "মুহাম্মদ ইবনে আব্দুল্লাহ", "মুহাম্মদ ইবনে উমর", "আব্দুল্লাহ ইবনে মুহাম্মদ"], "ans": 1},
     {"q": "রাসূল ﷺ কোথায় জন্মগ্রহণ করেন?", "options": ["মদিনা", "তাইফ", "মক্কা", "জেরুজালেম"], "ans": 2},
@@ -40,27 +87,6 @@ QUESTIONS = [
     {"q": "মক্কা বিজয় (ফতহ মক্কা) কত হিজরিতে হয়েছিল?", "options": ["৬ হিজরি", "৭ হিজরি", "৮ হিজরি", "৯ হিজরি"], "ans": 2}
 ]
 
-def load_leaderboard():
-    if not os.path.exists(LEADERBOARD_FILE):
-        return []
-    try:
-        with open(LEADERBOARD_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            # Sort: highest score first, then lowest time on tie
-            data.sort(key=lambda x: (-x['score'], x['time_sec']))
-            return data
-    except Exception as e:
-        print(f"Leaderboard load error: {e}")
-        return []
-
-def save_leaderboard(data):
-    with leaderboard_lock:
-        try:
-            with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            print(f"Leaderboard save error: {e}")
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -79,10 +105,9 @@ def submit_score():
         time_sec = int(data.get('time_sec', 0))
 
         if not name or score is None or time_sec is None:
-            return jsonify({"error": "Missing required fields"}), 400
+            return jsonify({"error": "Missing fields"}), 400
 
         leaderboard = load_leaderboard()
-
         entry = {
             "name": name,
             "dept": dept,
@@ -91,7 +116,6 @@ def submit_score():
             "time_display": f"{time_sec // 60:02d}:{time_sec % 60:02d}",
             "submitted_at": datetime.utcnow().isoformat()
         }
-
         leaderboard.append(entry)
         save_leaderboard(leaderboard)
 
@@ -101,15 +125,45 @@ def submit_score():
         return jsonify({"error": "Server error"}), 500
 
 @app.route('/api/leaderboard')
-def get_leaderboard_api():
+def get_leaderboard():
     return jsonify(load_leaderboard())
 
-# Optional: serve static files explicitly (helps debugging)
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    return send_from_directory('static', filename)
+# ──────────────────────────────────────────────
+# Server-Sent Events (SSE) for realtime updates
+# ──────────────────────────────────────────────
+@app.route('/api/events')
+def sse_events():
+    def generate():
+        queue = Queue()
+        clients.add(queue)
+        try:
+            while True:
+                data = queue.get()
+                yield f"data: {data}\n\n"
+        except GeneratorExit:
+            clients.discard(queue)
+
+    return Response(generate(), mimetype='text/event-stream')
+
+def broadcast_update():
+    data = json.dumps({"leaderboard": load_leaderboard()})
+    for client in list(clients):
+        try:
+            client.put(data)
+        except:
+            clients.discard(client)
+
+# Override save to also broadcast
+def save_leaderboard():
+    with leaderboard_lock:
+        try:
+            with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
+                json.dump(leaderboard, f, ensure_ascii=False, indent=2)
+            broadcast_update()
+        except Exception as e:
+            print(f"Save broadcast error: {e}")
 
 if __name__ == '__main__':
-    # Local development only
+    # For local testing only
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)

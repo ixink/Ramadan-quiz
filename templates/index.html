@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="bn" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>প্রোডাক্টিভ রমাদান ২.০ কুইজ প্রতিযোগিতা | DIU</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+</head>
+<body>
+
+<div class="container">
+
+  <img src="https://images.unsplash.com/photo-1581092160560-1c1e428e9d65?w=1200" alt="Ramadan Banner" class="banner">
+
+  <h1>প্রোডাক্টিভ রমাদান - ২.০</h1>
+  <h2>কুইজ প্রতিযোগিতা</h2>
+
+  <div id="home" class="card">
+    <div style="text-align:center">
+      <button class="btn-start" onclick="startQuiz()">কুইজে যোগ দিন</button>
+      <button onclick="showRanking()">র‍্যাঙ্কিং দেখুন</button>
+    </div>
+  </div>
+
+  <div id="registration" class="card hidden">
+    <h2 class="section-title">অংশগ্রহণের তথ্য</h2>
+    <form id="regForm">
+      <div class="form-group">
+        <label for="name">নাম *</label>
+        <input type="text" id="name" required>
+      </div>
+      <div class="form-group">
+        <label for="dept">বিভাগ *</label>
+        <input type="text" id="dept" required>
+      </div>
+      <div class="form-group">
+        <label for="email">ইমেইল *</label>
+        <input type="email" id="email" required>
+      </div>
+      <button type="submit" class="btn-start">কুইজ শুরু করুন</button>
+    </form>
+  </div>
+
+  <div id="quiz" class="card hidden">
+    <div class="timer" id="timer">সময় বাকি: ০৮:০০</div>
+    <div id="questionContainer"></div>
+    <div style="text-align:center; margin-top:2rem;">
+      <button id="submitBtn" style="background:#991b1b; color:white;">কুইজ জমা দিন</button>
+    </div>
+  </div>
+
+  <div id="result" class="card hidden">
+    <h2 class="section-title">আপনার ফলাফল</h2>
+    <div class="score-big" id="scoreDisplay">0.00</div>
+    <div class="stats">
+      <div class="stat-box">সঠিক <span id="correctCount">0</span></div>
+      <div class="stat-box">ভুল <span id="wrongCount">0</span></div>
+      <div class="stat-box">এড়ানো <span id="skipCount">0</span></div>
+    </div>
+    <p style="text-align:center; margin:1.5rem 0;">
+      সময় নিয়েছেন: <strong id="timeTaken"></strong>
+    </p>
+    <div style="text-align:center">
+      <button onclick="showRanking()">র‍্যাঙ্কিং দেখুন</button>
+      <button onclick="location.reload()">আবার শুরু করুন</button>
+    </div>
+  </div>
+
+  <div id="ranking" class="card hidden">
+    <h2 class="section-title">লাইভ র‍্যাঙ্কিং</h2>
+    <table id="rankTable">
+      <thead>
+        <tr>
+          <th>র‍্যাঙ্ক</th>
+          <th>নাম</th>
+          <th>বিভাগ</th>
+          <th>নম্বর</th>
+          <th>সময়</th>
+        </tr>
+      </thead>
+      <tbody id="rankBody"></tbody>
+    </table>
+    <div style="text-align:center; margin-top:2rem;">
+      <button onclick="location.reload()">হোমে ফিরুন</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let questions = [];
+let currentQuestion = 0;
+let selectedAnswers = [];
+let timerInterval;
+let startTime;
+
+const API_BASE = '/api';
+
+// Fetch questions from backend
+fetch(API_BASE + '/questions')
+  .then(r => r.json())
+  .then(data => {
+    questions = data;
+    selectedAnswers = Array(questions.length).fill(-1);
+  })
+  .catch(err => console.error("Questions load failed", err));
+
+function startQuiz() {
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('registration').classList.remove('hidden');
+}
+
+document.getElementById('regForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const dept = document.getElementById('dept').value.trim();
+  const email = document.getElementById('email').value.trim();
+
+  if (!name || !dept || !email) {
+    alert("সব তথ্য পূরণ করুন");
+    return;
+  }
+
+  localStorage.setItem('quizName', name);
+  localStorage.setItem('quizDept', dept);
+
+  startTime = Date.now();
+  currentQuestion = 0;
+  selectedAnswers.fill(-1);
+
+  document.getElementById('registration').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+
+  loadQuestion(0);
+  startTimer();
+});
+
+function loadQuestion(idx) {
+  if (idx >= questions.length) {
+    submitQuiz();
+    return;
+  }
+
+  const q = questions[idx];
+  let html = `<div class="question"><strong>প্রশ্ন ${idx+1}/${questions.length}:</strong><br>${q.q}</div>`;
+  html += '<div class="options">';
+
+  q.options.forEach((opt, i) => {
+    const checked = selectedAnswers[idx] === i ? 'checked' : '';
+    html += `
+      <label class="option-label">
+        <input type="radio" name="q${idx}" value="${i}" ${checked}>
+        ${String.fromCharCode(1072 + i)}) ${opt}
+      </label>`;
+  });
+
+  html += '</div>';
+  document.getElementById("questionContainer").innerHTML = html;
+
+  document.querySelectorAll(`input[name="q${idx}"]`).forEach(radio => {
+    radio.addEventListener('change', e => {
+      selectedAnswers[idx] = parseInt(e.target.value);
+    });
+  });
+}
+
+function startTimer() {
+  let timeLeft = 8 * 60;
+  const timerEl = document.getElementById("timer");
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+    const s = String(timeLeft % 60).padStart(2, '0');
+    timerEl.textContent = `সময় বাকি: ${m}:${s}`;
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      submitQuiz(true);
+    }
+  }, 1000);
+}
+
+async function submitQuiz(timeUp = false) {
+  clearInterval(timerInterval);
+
+  let score = 0;
+  let correct = 0;
+  let wrong = 0;
+  let skip = 0;
+
+  selectedAnswers.forEach((ans, i) => {
+    if (ans === -1) skip++;
+    else if (ans === questions[i].ans) { score += 1; correct++; }
+    else { score -= 0.25; wrong++; }
+  });
+
+  const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
+  const min = Math.floor(timeTakenSec / 60);
+  const sec = timeTakenSec % 60;
+  const timeStr = `${min} মিনিট ${sec} সেকেন্ড`;
+
+  document.getElementById("scoreDisplay").textContent = score.toFixed(2);
+  document.getElementById("correctCount").textContent = correct;
+  document.getElementById("wrongCount").textContent = wrong;
+  document.getElementById("skipCount").textContent = skip;
+  document.getElementById("timeTaken").textContent = timeStr;
+
+  const name = localStorage.getItem("quizName") || "Anonymous";
+  const dept = localStorage.getItem("quizDept") || "-";
+
+  try {
+    await fetch(API_BASE + '/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, dept, score, time_sec: timeTakenSec })
+    });
+  } catch (e) {
+    console.error("Submit failed", e);
+  }
+
+  document.getElementById("quiz").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+}
+
+document.getElementById("submitBtn").onclick = () => {
+  if (confirm("আপনি কি কুইজ জমা দিতে চান?")) {
+    submitQuiz();
+  }
+};
+
+async function showRanking() {
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("registration").classList.add("hidden");
+  document.getElementById("quiz").classList.add("hidden");
+  document.getElementById("result").classList.add("hidden");
+  document.getElementById("ranking").classList.remove("hidden");
+
+  try {
+    const res = await fetch(API_BASE + '/leaderboard');
+    const data = await res.json();
+
+    const tbody = document.getElementById("rankBody");
+    tbody.innerHTML = "";
+
+    data.forEach((p, i) => {
+      const tr = document.createElement("tr");
+      if (i === 0) tr.className = "highlight-1";
+      else if (i === 1) tr.className = "highlight-2";
+      else if (i === 2) tr.className = "highlight-3";
+
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td>${p.name}</td>
+        <td>${p.dept}</td>
+        <td>${p.score.toFixed(2)}</td>
+        <td>${p.time_display}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    console.error("Leaderboard load failed", e);
+  }
+}
+</script>
+</body>
+        </html>

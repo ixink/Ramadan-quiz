@@ -1,14 +1,21 @@
-from flask import Flask, render_template, request, jsonify
+# app.py
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import json
 import os
 from datetime import datetime
+import threading
 
-app = Flask(__name__)
+app = Flask(__name__,
+            template_folder='templates',
+            static_folder='static')
 
-# Path to JSON files
-LEADERBOARD_FILE = 'leaderboard.json'
+# File paths
+LEADERBOARD_FILE = os.path.join(os.path.dirname(__file__), 'leaderboard.json')
 
-# All 21 questions (hardcoded in backend)
+# Thread lock to prevent race conditions on JSON writes
+leaderboard_lock = threading.Lock()
+
+# All 21 questions (hardcoded)
 QUESTIONS = [
     {"q": "রাসূল ﷺ এর পুরো নাম কী?", "options": ["আহমদ ইবনে আব্দুল্লাহ", "মুহাম্মদ ইবনে আব্দুল্লাহ", "মুহাম্মদ ইবনে উমর", "আব্দুল্লাহ ইবনে মুহাম্মদ"], "ans": 1},
     {"q": "রাসূল ﷺ কোথায় জন্মগ্রহণ করেন?", "options": ["মদিনা", "তাইফ", "মক্কা", "জেরুজালেম"], "ans": 2},
@@ -33,61 +40,76 @@ QUESTIONS = [
     {"q": "মক্কা বিজয় (ফতহ মক্কা) কত হিজরিতে হয়েছিল?", "options": ["৬ হিজরি", "৭ হিজরি", "৮ হিজরি", "৯ হিজরি"], "ans": 2}
 ]
 
-# Load or initialize leaderboard
-def get_leaderboard():
+def load_leaderboard():
     if not os.path.exists(LEADERBOARD_FILE):
         return []
     try:
         with open(LEADERBOARD_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            # Sort: higher score first, then lower time on tie
+            # Sort: highest score first, then lowest time on tie
             data.sort(key=lambda x: (-x['score'], x['time_sec']))
             return data
-    except:
+    except Exception as e:
+        print(f"Leaderboard load error: {e}")
         return []
 
-def save_to_leaderboard(entry):
-    leaderboard = get_leaderboard()
-    leaderboard.append(entry)
-    with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
-        json.dump(leaderboard, f, ensure_ascii=False, indent=2)
+def save_leaderboard(data):
+    with leaderboard_lock:
+        try:
+            with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"Leaderboard save error: {e}")
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/api/questions')
-def api_questions():
+def get_questions():
     return jsonify(QUESTIONS)
 
 @app.route('/api/submit', methods=['POST'])
-def api_submit():
-    data = request.get_json()
-    
-    name = data.get('name', 'Anonymous').strip()
-    dept = data.get('dept', '-').strip()
-    score = float(data.get('score', 0))
-    time_sec = int(data.get('time_sec', 0))
+def submit_score():
+    try:
+        data = request.get_json()
+        name = data.get('name', 'Anonymous').strip()
+        dept = data.get('dept', '-').strip()
+        score = float(data.get('score', 0))
+        time_sec = int(data.get('time_sec', 0))
 
-    if not name or score is None or time_sec is None:
-        return jsonify({"error": "Missing required fields"}), 400
+        if not name or score is None or time_sec is None:
+            return jsonify({"error": "Missing required fields"}), 400
 
-    entry = {
-        "name": name,
-        "dept": dept,
-        "score": score,
-        "time_sec": time_sec,
-        "time_display": f"{time_sec // 60:02d}:{time_sec % 60:02d}",
-        "submitted_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
+        leaderboard = load_leaderboard()
 
-    save_to_leaderboard(entry)
+        entry = {
+            "name": name,
+            "dept": dept,
+            "score": score,
+            "time_sec": time_sec,
+            "time_display": f"{time_sec // 60:02d}:{time_sec % 60:02d}",
+            "submitted_at": datetime.utcnow().isoformat()
+        }
 
-    return jsonify({"status": "success"})
+        leaderboard.append(entry)
+        save_leaderboard(leaderboard)
+
+        return jsonify({"status": "success"})
+    except Exception as e:
+        print(f"Submit error: {e}")
+        return jsonify({"error": "Server error"}), 500
 
 @app.route('/api/leaderboard')
-def api_leaderboard():
-    return jsonify(get_leaderboard())
+def get_leaderboard_api():
+    return jsonify(load_leaderboard())
+
+# Optional: serve static files explicitly (helps debugging)
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('static', filename)
 
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    # Local development only
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)

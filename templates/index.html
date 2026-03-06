@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn" dir="rtl">
+<html lang="bn" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -19,7 +19,7 @@
     * { margin:0; padding:0; box-sizing:border-box; }
 
     body {
-      font-family: 'Hind Siliguri', 'Noto Naskh Arabic', sans-serif;
+      font-family: 'Hind Siliguri', sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       color: var(--ramadan-light);
       min-height: 100vh;
@@ -54,7 +54,6 @@
       padding: 2rem;
       margin-bottom: 2rem;
       box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      border: 1px solid rgba(212,160,23,0.2);
     }
 
     .form-group {
@@ -67,7 +66,7 @@
       font-weight: 500;
     }
 
-    input {
+    input, textarea {
       width: 100%;
       padding: 12px;
       border-radius: 8px;
@@ -82,11 +81,10 @@
       color: white;
       border: none;
       padding: 14px 32px;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
-      transition: background 0.2s;
     }
 
     button:hover {
@@ -96,37 +94,41 @@
     .btn-start {
       background: var(--ramadan-gold);
       color: #0f172a;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       padding: 16px 48px;
       margin: 2rem auto;
       display: block;
     }
 
     .timer {
-      font-size: 2.4rem;
+      font-size: 2.6rem;
       font-weight: bold;
       color: var(--ramadan-gold);
       text-align: center;
       margin: 1.5rem 0;
-      padding: 12px;
+      padding: 15px;
       border-radius: 12px;
-      background: rgba(20,83,45,0.3);
-      border: 1px solid var(--ramadan-green);
+      background: rgba(20,83,45,0.4);
+      border: 2px solid var(--ramadan-green);
     }
 
     .question {
       margin: 2rem 0;
-      font-size: 1.2rem;
-      line-height: 1.6;
+      padding: 1.5rem;
+      background: rgba(20,83,45,0.25);
+      border-radius: 10px;
+      border-left: 5px solid var(--ramadan-gold);
     }
 
     .question strong {
       color: var(--ramadan-gold);
+      font-size: 1.3rem;
     }
 
     .options {
-      display: grid;
-      gap: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
       margin-top: 1rem;
     }
 
@@ -136,11 +138,12 @@
       border-radius: 10px;
       cursor: pointer;
       border: 2px solid transparent;
-      transition: border-color 0.2s;
+      transition: all 0.2s;
     }
 
     .option-label:hover {
-      border-color: #475569;
+      border-color: var(--ramadan-gold);
+      background: #253549;
     }
 
     input[type="radio"] {
@@ -153,7 +156,7 @@
     }
 
     .score-big {
-      font-size: 5rem;
+      font-size: 6rem;
       font-weight: bold;
       color: var(--ramadan-gold);
       margin: 1rem 0;
@@ -162,44 +165,18 @@
     .stats {
       display: flex;
       justify-content: center;
-      gap: 2.5rem;
+      gap: 3rem;
       flex-wrap: wrap;
       margin: 2rem 0;
     }
 
     .stat-box {
       background: rgba(20,83,45,0.4);
-      padding: 1.5rem 2.5rem;
+      padding: 1.8rem 3rem;
       border-radius: 12px;
       border: 1px solid var(--ramadan-green);
+      font-size: 1.3rem;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1.5rem;
-      background: #0f172a;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    th, td {
-      padding: 14px;
-      text-align: right;
-    }
-
-    th {
-      background: var(--ramadan-green);
-      color: white;
-    }
-
-    tr:nth-child(even) {
-      background: rgba(255,255,255,0.04);
-    }
-
-    .highlight-1 { background: rgba(212,160,23,0.15); }
-    .highlight-2 { background: rgba(203,213,225,0.12); }
-    .highlight-3 { background: rgba(156,163,175,0.12); }
 
     .section-title {
       color: var(--ramadan-gold);
@@ -213,9 +190,9 @@
       display: none !important;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
       .banner { height: 160px; }
-      .score-big { font-size: 3.8rem; }
+      .score-big { font-size: 4rem; }
       .stats { flex-direction: column; align-items: center; gap: 1.5rem; }
     }
   </style>
@@ -224,13 +201,13 @@
 
 <div class="container">
 
-  <img src="https://images.unsplash.com/photo-1581092160560-1c1e428e9d65?w=1200&auto=format&fit=crop&q=80" 
+  <img src="https://images.unsplash.com/photo-1581092160560-1c1e428e9d65?w=1200" 
        alt="Ramadan Banner" class="banner">
 
   <h1>প্রোডাক্টিভ রমাদান - ২.০</h1>
   <h2>কুইজ প্রতিযোগিতা</h2>
 
-  <p style="text-align:center; color:#94a3b8; margin-bottom:2rem;">
+  <p style="text-align:center; color:#94a3b8; margin:1.5rem 0 2.5rem;">
     আয়োজনে: ঢাকা ইন্টারন্যাশনাল ইউনিভার্সিটি<br>
     সহযোগিতায়: ডিআইইউ মুসলিমস কমিউনিটি
   </p>
@@ -238,9 +215,8 @@
   <!-- Home -->
   <div id="home" class="card">
     <div style="text-align:center;">
-      <button class="btn-start" onclick="show('registration')">কুইজে যোগ দিন</button>
-      <button style="margin-left:1.5rem; background:#334155; padding:16px 40px;" 
-              onclick="show('ranking')">র‍্যাঙ্কিং দেখুন</button>
+      <button class="btn-start" onclick="show('registration')">কুইজে অংশগ্রহণ করুন</button>
+      <button style="margin-left:1.5rem; background:#334155;" onclick="show('ranking')">র‍্যাঙ্কিং দেখুন</button>
     </div>
   </div>
 
@@ -264,12 +240,16 @@
     </form>
   </div>
 
-  <!-- Quiz -->
+  <!-- Quiz - All questions visible -->
   <div id="quiz" class="card hidden">
     <div class="timer" id="timer">সময় বাকি: ০৮:০০</div>
-    <div id="questionContainer"></div>
-    <div style="text-align:center; margin-top:2.5rem;">
-      <button id="submitBtn" style="background:#991b1b;">কুইজ জমা দিন</button>
+
+    <div id="questionsContainer"></div>
+
+    <div style="text-align:center; margin-top:3rem;">
+      <button id="submitBtn" style="background:#991b1b; font-size:1.4rem; padding:18px 60px;">
+        কুইজ জমা দিন
+      </button>
     </div>
   </div>
 
@@ -279,18 +259,18 @@
     <div class="score-big" id="scoreDisplay">0.00</div>
 
     <div class="stats">
-      <div class="stat-box"><strong>সঠিক</strong><br><span id="correctCount">0</span></div>
-      <div class="stat-box"><strong>ভুল</strong><br><span id="wrongCount">0</span></div>
-      <div class="stat-box"><strong>এড়ানো</strong><br><span id="skipCount">0</span></div>
+      <div class="stat-box">সঠিক <span id="correctCount">0</span></div>
+      <div class="stat-box">ভুল <span id="wrongCount">0</span></div>
+      <div class="stat-box">এড়ানো <span id="skipCount">0</span></div>
     </div>
 
-    <p style="text-align:center; margin:1.5rem 0;">
+    <p style="text-align:center; font-size:1.4rem; margin:2rem 0;">
       সময় নিয়েছেন: <strong id="timeTaken"></strong>
     </p>
 
     <div style="text-align:center; margin-top:2rem;">
       <button onclick="show('ranking')">র‍্যাঙ্কিং দেখুন</button>
-      <button onclick="location.reload()">আবার শুরু করুন</button>
+      <button onclick="location.reload()" style="margin-left:1.5rem;">আবার চেষ্টা করুন</button>
     </div>
   </div>
 
@@ -309,7 +289,6 @@
       </thead>
       <tbody id="rankBody"></tbody>
     </table>
-
     <div style="text-align:center; margin-top:2.5rem;">
       <button onclick="show('home')">হোমে ফিরুন</button>
     </div>
@@ -319,207 +298,164 @@
 
 <script>
 // ──────────────────────────────────────────────
-// Global variables
+// Global state
 // ──────────────────────────────────────────────
 let questions = [];
-let currentQuestion = 0;
-let selectedAnswers = [];
 let timerInterval;
 let startTime;
 
 // ──────────────────────────────────────────────
-// Show / hide sections
+// Show section
 // ──────────────────────────────────────────────
-function show(sectionId) {
+function show(id) {
   document.querySelectorAll('#home, #registration, #quiz, #result, #ranking')
     .forEach(el => el.classList.add('hidden'));
-  document.getElementById(sectionId).classList.remove('hidden');
+  document.getElementById(id).classList.remove('hidden');
 
-  if (sectionId === 'ranking') {
-    loadLeaderboard();
-  }
+  if (id === 'ranking') loadLeaderboard();
 }
 
 // ──────────────────────────────────────────────
 // Load questions from backend
 // ──────────────────────────────────────────────
 fetch('/api/questions')
-  .then(response => response.json())
+  .then(r => r.json())
   .then(data => {
     questions = data;
-    selectedAnswers = Array(questions.length).fill(-1);
+    renderAllQuestions();
   })
   .catch(err => {
-    console.error("Failed to load questions:", err);
-    alert("প্রশ্ন লোড করতে সমস্যা হয়েছে। পেজ রিফ্রেশ করুন।");
+    console.error(err);
+    alert("প্রশ্ন লোড করতে সমস্যা। পেজ রিফ্রেশ করুন।");
   });
 
 // ──────────────────────────────────────────────
-// Registration → Start quiz
+// Render all questions on one page
 // ──────────────────────────────────────────────
-document.getElementById('regForm').addEventListener('submit', function(e) {
-  e.preventDefault();
+function renderAllQuestions() {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
 
-  const name = document.getElementById('name').value.trim();
-  const dept = document.getElementById('dept').value.trim();
-  const email = document.getElementById('email').value.trim();
-
-  if (!name || !dept || !email) {
-    alert("সব তথ্য পূরণ করুন");
-    return;
-  }
-
-  localStorage.setItem('quizName', name);
-  localStorage.setItem('quizDept', dept);
-
-  startTime = Date.now();
-  currentQuestion = 0;
-  selectedAnswers.fill(-1);
-
-  show('quiz');
-  loadQuestion(0);
-  startTimer();
-});
-
-// ──────────────────────────────────────────────
-// Load a single question
-// ──────────────────────────────────────────────
-function loadQuestion(index) {
-  if (index >= questions.length) {
-    submitQuiz();
-    return;
-  }
-
-  const q = questions[index];
-  let html = `
-    <div class="question">
+  questions.forEach((q, index) => {
+    const questionDiv = document.createElement('div');
+    questionDiv.className = 'question';
+    questionDiv.innerHTML = `
       <strong>প্রশ্ন ${index + 1}/${questions.length}:</strong><br>
       ${q.q}
-    </div>
-    <div class="options">
-  `;
-
-  q.options.forEach((option, i) => {
-    const checked = selectedAnswers[index] === i ? 'checked' : '';
-    html += `
-      <label class="option-label">
-        <input type="radio" name="q${index}" value="${i}" ${checked}>
-        ${String.fromCharCode(1072 + i)}) ${option}
-      </label>
     `;
-  });
 
-  html += '</div>';
-  document.getElementById('questionContainer').innerHTML = html;
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = 'options';
 
-  // Save answer when changed
-  document.querySelectorAll(`input[name="q${index}"]`).forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      selectedAnswers[index] = parseInt(e.target.value);
+    q.options.forEach((opt, i) => {
+      const label = document.createElement('label');
+      label.className = 'option-label';
+      label.innerHTML = `
+        <input type="radio" name="q${index}" value="${i}">
+        ${String.fromCharCode(1072 + i)}) ${opt}
+      `;
+      optionsDiv.appendChild(label);
     });
+
+    questionDiv.appendChild(optionsDiv);
+    container.appendChild(questionDiv);
   });
 }
 
 // ──────────────────────────────────────────────
-// Timer (8 minutes)
+// Start timer & auto-submit after 8 min
 // ──────────────────────────────────────────────
 function startTimer() {
-  let timeLeft = 8 * 60; // 480 seconds
+  let timeLeft = 8 * 60;
 
   const timerEl = document.getElementById('timer');
 
-  const updateTimer = () => {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    timerEl.textContent = `সময় বাকি: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const tick = () => {
+    const min = Math.floor(timeLeft / 60);
+    const sec = timeLeft % 60;
+    timerEl.textContent = `সময় বাকি: ${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
 
     if (timeLeft <= 0) {
       clearInterval(timerInterval);
-      submitQuiz(true); // auto-submit on timeout
+      submitQuiz(true);
+    } else {
+      timeLeft--;
     }
-
-    timeLeft--;
   };
 
-  updateTimer();
-  timerInterval = setInterval(updateTimer, 1000);
+  tick();
+  timerInterval = setInterval(tick, 1000);
 }
 
 // ──────────────────────────────────────────────
-// Submit quiz & send score to backend
+// Submit function (manual or timeout)
 // ──────────────────────────────────────────────
-async function submitQuiz(isTimeout = false) {
+async function submitQuiz(timeout = false) {
   clearInterval(timerInterval);
 
   let score = 0;
   let correct = 0;
   let wrong = 0;
-  let skipped = 0;
+  let skip = 0;
 
-  selectedAnswers.forEach((answer, index) => {
-    if (answer === -1) {
-      skipped++;
-    } else if (answer === questions[index].ans) {
-      score += 1;
-      correct++;
-    } else {
-      score -= 0.25;
-      wrong++;
-    }
-  });
+  for (let i = 0; i < questions.length; i++) {
+    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+    const ans = selected ? parseInt(selected.value) : -1;
 
-  const timeTakenSeconds = Math.floor((Date.now() - startTime) / 1000);
-  const minutes = Math.floor(timeTakenSeconds / 60);
-  const seconds = timeTakenSeconds % 60;
+    if (ans === -1) skip++;
+    else if (ans === questions[i].ans) { score += 1; correct++; }
+    else { score -= 0.25; wrong++; }
+  }
+
+  const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
+  const min = Math.floor(timeTakenSec / 60);
+  const sec = timeTakenSec % 60;
 
   document.getElementById('scoreDisplay').textContent = score.toFixed(2);
   document.getElementById('correctCount').textContent = correct;
   document.getElementById('wrongCount').textContent = wrong;
-  document.getElementById('skipCount').textContent = skipped;
-  document.getElementById('timeTaken').textContent = `${minutes} মিনিট ${seconds} সেকেন্ড`;
+  document.getElementById('skipCount').textContent = skip;
+  document.getElementById('timeTaken').textContent = `${min} মিনিট ${sec} সেকেন্ড`;
 
   const payload = {
     name: localStorage.getItem('quizName') || 'Anonymous',
     dept: localStorage.getItem('quizDept') || '-',
-    score: score,
-    time_sec: timeTakenSeconds
+    score,
+    time_sec: timeTakenSec
   };
 
   try {
-    const response = await fetch('/api/submit', {
+    await fetch('/api/submit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
     });
-
-    if (!response.ok) throw new Error('Submit failed');
-  } catch (err) {
-    console.error('Submit error:', err);
-    alert('স্কোর জমা দিতে সমস্যা হয়েছে।');
+  } catch (e) {
+    console.error('Submit failed:', e);
   }
 
   show('result');
 }
 
 // ──────────────────────────────────────────────
-// Load & display leaderboard
+// Load leaderboard
 // ──────────────────────────────────────────────
 async function loadLeaderboard() {
   try {
-    const response = await fetch('/api/leaderboard');
-    const data = await response.json();
+    const res = await fetch('/api/leaderboard');
+    const data = await res.json();
 
     const tbody = document.getElementById('rankBody');
     tbody.innerHTML = '';
 
-    data.forEach((item, index) => {
+    data.forEach((item, i) => {
       const tr = document.createElement('tr');
-      if (index === 0) tr.className = 'highlight-1';
-      else if (index === 1) tr.className = 'highlight-2';
-      else if (index === 2) tr.className = 'highlight-3';
+      if (i === 0) tr.className = 'highlight-1';
+      else if (i === 1) tr.className = 'highlight-2';
+      else if (i === 2) tr.className = 'highlight-3';
 
       tr.innerHTML = `
-        <td>${index + 1}</td>
+        <td>${i+1}</td>
         <td>${item.name}</td>
         <td>${item.dept}</td>
         <td>${item.score.toFixed(2)}</td>
@@ -527,22 +463,39 @@ async function loadLeaderboard() {
       `;
       tbody.appendChild(tr);
     });
-  } catch (err) {
-    console.error('Leaderboard load failed:', err);
-    document.getElementById('rankBody').innerHTML = '<tr><td colspan="5">লোড করতে সমস্যা হয়েছে</td></tr>';
+  } catch (e) {
+    console.error('Leaderboard failed:', e);
   }
 }
 
 // ──────────────────────────────────────────────
-// Event listeners
+// Events
 // ──────────────────────────────────────────────
+document.getElementById('regForm').addEventListener('submit', e => {
+  e.preventDefault();
+
+  const name  = document.getElementById('name').value.trim();
+  const dept  = document.getElementById('dept').value.trim();
+  const email = document.getElementById('email').value.trim();
+
+  if (!name || !dept || !email) {
+    return alert('সব তথ্য পূরণ করুন');
+  }
+
+  localStorage.setItem('quizName', name);
+  localStorage.setItem('quizDept', dept);
+
+  startTime = Date.now();
+  show('quiz');
+  startTimer();
+});
+
 document.getElementById('submitBtn').addEventListener('click', () => {
-  if (confirm('আপনি কি কুইজ জমা দিতে চান?')) {
+  if (confirm('কুইজ জমা দিতে চান?')) {
     submitQuiz();
   }
 });
 
-// Initial view
 show('home');
 </script>
 </body>

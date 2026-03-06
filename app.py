@@ -5,58 +5,48 @@ from datetime import datetime
 import threading
 from queue import Queue
 
-app = Flask(__name__,
-            template_folder='templates',
-            static_folder='static')
+app = Flask(__name__)
 
-# File path & configuration
+# Configuration
 LEADERBOARD_FILE = os.path.join(os.path.dirname(__file__), 'leaderboard.json')
 leaderboard_lock = threading.Lock()
 leaderboard = []
 clients = set()
 
-def load_leaderboard_from_disk():
-    """Initial load of the leaderboard from the JSON file."""
+def load_data():
     global leaderboard
     if not os.path.exists(LEADERBOARD_FILE):
         with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
             json.dump([], f, ensure_ascii=False, indent=2)
-        leaderboard = []
         return
-
     try:
         with open(LEADERBOARD_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            # Sort: highest score first, then lowest time
             data.sort(key=lambda x: (-x['score'], x['time_sec']))
             leaderboard = data
-    except Exception as e:
-        print(f"Initial load error: {e}")
+    except:
         leaderboard = []
 
 def save_and_broadcast():
-    """Sorts, saves to disk, and pushes updates to all active SSE clients."""
     global leaderboard
     with leaderboard_lock:
-        # Final sort before broadcast to ensure correct ranking
         leaderboard.sort(key=lambda x: (-x['score'], x['time_sec']))
         try:
-            # Write to JSON
             with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
                 json.dump(leaderboard, f, ensure_ascii=False, indent=2)
             
-            # Notify all connected clients
-            message = json.dumps(leaderboard)
+            # Broadcast to all SSE clients
+            msg = json.dumps(leaderboard)
             for client in list(clients):
                 try:
-                    client.put(message)
+                    client.put(msg)
                 except:
                     clients.discard(client)
         except Exception as e:
-            print(f"Broadcast error: {e}")
+            print(f"Sync Error: {e}")
 
-# Load leaderboard into memory at startup
-load_leaderboard_from_disk()
+# Load on startup
+load_data()
 
 QUESTIONS = [
     {"q": "রাসূল ﷺ এর পুরো নাম কী?", "options": ["আহমদ ইবনে আব্দুল্লাহ", "মুহাম্মদ ইবনে আব্দুল্লাহ", "মুহাম্মদ ইবনে উমর", "আব্দুল্লাহ ইবনে মুহাম্মদ"], "ans": 1},
@@ -93,32 +83,21 @@ def get_questions():
 @app.route('/api/submit', methods=['POST'])
 def submit_score():
     global leaderboard
+    data = request.get_json()
     try:
-        data = request.get_json()
-        name = data.get('name', 'Anonymous').strip()
-        dept = data.get('dept', '-').strip()
-        score = float(data.get('score', 0))
-        time_sec = int(data.get('time_sec', 0))
-
-        if not name:
-            return jsonify({"error": "Name is required"}), 400
-
         new_entry = {
-            "name": name,
-            "dept": dept,
-            "score": score,
-            "time_sec": time_sec,
-            "time_display": f"{time_sec // 60:02d}:{time_sec % 60:02d}",
-            "submitted_at": datetime.utcnow().isoformat()
+            "name": data.get('name', 'Anonymous'),
+            "dept": data.get('dept', '-'),
+            "score": float(data.get('score', 0)),
+            "time_sec": int(data.get('time_sec', 0)),
+            "time_display": f"{int(data.get('time_sec', 0)) // 60:02d}:{int(data.get('time_sec', 0)) % 60:02d}",
+            "submitted_at": datetime.now().strftime("%H:%M:%S")
         }
-        
         leaderboard.append(new_entry)
-        save_and_broadcast() # Instant update triggered here
-
+        save_and_broadcast()
         return jsonify({"status": "success"})
     except Exception as e:
-        print(f"Submission Error: {e}")
-        return jsonify({"error": "Failed to save score"}), 500
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/leaderboard')
 def get_leaderboard():
@@ -126,22 +105,17 @@ def get_leaderboard():
 
 @app.route('/api/events')
 def sse_events():
-    """SSE endpoint to push real-time updates to the frontend."""
     def generate():
         q = Queue()
         clients.add(q)
         try:
-            # Send current leaderboard immediately upon connection
             yield f"data: {json.dumps(leaderboard)}\n\n"
             while True:
                 data = q.get()
                 yield f"data: {data}\n\n"
         except GeneratorExit:
             clients.discard(q)
-
     return Response(generate(), mimetype='text/event-stream')
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    # Note: debug=True can sometimes cause double-loading of SSE in local dev
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=False)

@@ -8,173 +8,79 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        :root {
-            --primary-color: #14532d;
-            --accent-color: #d4a017;
-            --bg-dark: #0f172a;
-        }
-
-        body {
-            font-family: 'Hind Siliguri', sans-serif;
-            background-color: var(--bg-dark);
-            color: #f8fafc;
-            overflow-x: hidden;
-        }
-
-        .hero-section {
-            background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), 
-                        url('https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=2070') center/cover;
-            padding: 60px 0;
-            border-bottom: 3px solid var(--accent-color);
-        }
-
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .btn-ramadan {
-            background-color: var(--accent-color);
-            color: var(--bg-dark);
-            font-weight: 700;
-            border: none;
-            padding: 12px 30px;
-            transition: all 0.3s;
-        }
-
-        .btn-ramadan:hover {
-            transform: translateY(-3px);
-            background-color: #b88a14;
-            color: white;
-        }
-
-        .timer-badge {
-            font-size: 2rem;
-            color: var(--accent-color);
-            background: rgba(20, 83, 45, 0.3);
-            border: 2px solid var(--primary-color);
-            border-radius: 50px;
-            padding: 10px 30px;
-            display: inline-block;
-        }
-
-        .question-box {
-            background: rgba(255, 255, 255, 0.05);
-            border-left: 5px solid var(--accent-color);
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-        }
-
-        .option-container {
-            cursor: pointer;
-            transition: 0.2s;
-            border: 1px solid rgba(255,255,255,0.1);
-            margin: 5px 0;
-        }
-
-        .option-container:hover {
-            background: rgba(212, 160, 23, 0.1);
-            border-color: var(--accent-color);
-        }
-
-        .ranking-table thead {
-            background-color: var(--primary-color);
-        }
-
-        .rank-top { background: rgba(212, 160, 23, 0.2) !important; }
-
+        :root { --primary: #14532d; --accent: #d4a017; --dark: #0f172a; }
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: var(--dark); color: #f8fafc; }
+        .hero { background: linear-gradient(rgba(15,23,42,0.8), rgba(15,23,42,0.8)), url('https://images.unsplash.com/photo-1564121211835-e88c852648ab?q=80&w=2070') center/cover; padding: 50px 0; border-bottom: 3px solid var(--accent); }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn-ramadan { background: var(--accent); color: var(--dark); font-weight: 700; border: none; padding: 12px 30px; transition: 0.3s; }
+        .btn-ramadan:hover { transform: translateY(-3px); background: #b88a14; color: white; }
+        .timer-badge { font-size: 1.8rem; color: var(--accent); background: rgba(20,83,45,0.3); border: 2px solid var(--primary); border-radius: 50px; padding: 8px 25px; display: inline-block; }
+        .question-box { background: rgba(255,255,255,0.05); border-left: 5px solid var(--accent); padding: 20px; margin-bottom: 20px; border-radius: 10px; }
+        .option-container { cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1); margin: 5px 0; display: block; padding: 12px; border-radius: 8px; }
+        .option-container:hover { background: rgba(212,160,23,0.1); border-color: var(--accent); }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<header class="hero-section text-center mb-5 animate__animated animate__fadeIn">
+<header class="hero text-center mb-5">
     <div class="container">
-        <h1 class="display-4 fw-bold" style="color: var(--accent-color);">প্রোডাক্টিভ রমাদান - ২.০</h1>
-        <p class="lead">ঢাকা ইন্টারন্যাশনাল ইউনিভার্সিটি কুইজ প্রতিযোগিতা</p>
+        <h1 class="display-5 fw-bold" style="color: var(--accent);">প্রোডাক্টিভ রমাদান - ২.০</h1>
+        <p class="lead">ঢাকা ইন্টারন্যাশনাল ইউনিভার্সিটি</p>
     </div>
 </header>
 
 <div class="container mb-5">
     
-    <div id="home" class="row justify-content-center animate__animated animate__zoomIn">
-        <div class="col-md-8 glass-card text-center">
-            <h3>আসসালামু আলাইকুম!</h3>
-            <p class="mb-4 text-secondary">ইসলামিক জ্ঞান চর্চায় অংশগ্রহণ করুন এবং জিতে নিন আকর্ষণীয় পুরস্কার।</p>
-            <div class="d-grid gap-2 d-md-block">
-                <button class="btn btn-ramadan btn-lg m-2" onclick="showSection('registration')">অংশগ্রহণ করুন</button>
-                <button class="btn btn-outline-light btn-lg m-2" onclick="showSection('ranking')">র‍্যাঙ্কিং বোর্ড</button>
+    <div id="home" class="row justify-content-center animate__animated animate__fadeIn">
+        <div class="col-md-8 glass text-center">
+            <h3>রমাদান কুইজ ২০২৪</h3>
+            <p class="mb-4 text-secondary">ইসলামিক জ্ঞান চর্চায় অংশগ্রহণ করুন। একজন শুধুমাত্র একবারই অংশ নিতে পারবেন।</p>
+            <div id="checkExisting">
+                <button class="btn btn-ramadan btn-lg m-2" onclick="showSection('registration')">শুরু করুন</button>
             </div>
+            <button class="btn btn-outline-light btn-lg m-2" onclick="showSection('ranking')">লিডারবোর্ড</button>
         </div>
     </div>
 
     <div id="registration" class="row justify-content-center hidden">
-        <div class="col-md-6 glass-card animate__animated animate__fadeInRight">
-            <h4 class="text-center mb-4" style="color: var(--accent-color);">আপনার তথ্য দিন</h4>
+        <div class="col-md-6 glass animate__animated animate__fadeInRight">
+            <h4 class="text-center mb-4" style="color: var(--accent);">নিবন্ধন করুন</h4>
             <form id="regForm">
-                <div class="mb-3">
-                    <label class="form-label">পুরো নাম</label>
-                    <input type="text" id="userName" class="form-control bg-dark text-white border-secondary" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">বিভাগ (Department)</label>
-                    <input type="text" id="userDept" class="form-control bg-dark text-white border-secondary" placeholder="উদা: CSE" required>
-                </div>
+                <div class="mb-3"><label class="form-label">পুরো নাম</label>
+                <input type="text" id="userName" class="form-control bg-dark text-white" required></div>
+                <div class="mb-3"><label class="form-label">ইমেইল (সঠিক ইমেইল দিন)</label>
+                <input type="email" id="userEmail" class="form-control bg-dark text-white" required></div>
+                <div class="mb-3"><label class="form-label">বিভাগ (Department)</label>
+                <input type="text" id="userDept" class="form-control bg-dark text-white" required></div>
                 <button type="submit" class="btn btn-ramadan w-100 py-3 mt-3">কুইজ শুরু করুন</button>
             </form>
         </div>
     </div>
 
-    <div id="quiz" class="hidden animate__animated animate__fadeIn">
-        <div class="text-center mb-4">
-            <div id="timer" class="timer-badge animate__animated animate__pulse animate__infinite">০৮:০০</div>
-        </div>
+    <div id="quiz" class="hidden">
+        <div class="text-center mb-4"><div id="timer" class="timer-badge">০৮:০০</div></div>
         <div id="questionsContainer"></div>
         <div class="text-center mt-5">
-            <button class="btn btn-danger btn-lg px-5" onclick="confirmSubmit()">ফাইনাল সাবমিট</button>
+            <button class="btn btn-danger btn-lg px-5" onclick="confirmSubmit()">সাবমিট করুন</button>
         </div>
     </div>
 
-    <div id="result" class="row justify-content-center hidden text-center animate__animated animate__bounceIn">
-        <div class="col-md-8 glass-card">
-            <h2 style="color: var(--accent-color);">আলহামদুলিল্লাহ! কুইজ সম্পন্ন হয়েছে।</h2>
-            <div class="display-1 fw-bold my-4" id="finalScore">0.00</div>
-            <div class="row g-3 mb-4">
-                <div class="col-4"><div class="p-3 bg-success rounded">সঠিক: <span id="resCorrect">0</span></div></div>
-                <div class="col-4"><div class="p-3 bg-danger rounded">ভুল: <span id="resWrong">0</span></div></div>
-                <div class="col-4"><div class="p-3 bg-secondary rounded">সময়: <span id="resTime">0</span></div></div>
-            </div>
-            <button class="btn btn-ramadan btn-lg" onclick="showSection('ranking')">লাইভ র‍্যাঙ্কিং দেখুন</button>
-        </div>
-    </div>
-
-    <div id="ranking" class="hidden animate__animated animate__fadeInUp">
-        <div class="glass-card">
-            <h3 class="text-center mb-4" style="color: var(--accent-color);">লাইভ লিডারবোর্ড</h3>
+    <div id="ranking" class="hidden">
+        <div class="glass">
+            <h3 class="text-center mb-4" style="color: var(--accent);">লাইভ র‍্যাঙ্কিং</h3>
             <div class="table-responsive">
-                <table class="table table-dark table-hover ranking-table">
-                    <thead>
-                        <tr>
-                            <th>র‍্যাঙ্ক</th>
-                            <th>নাম</th>
-                            <th>বিভাগ</th>
-                            <th>স্কোর</th>
-                            <th>সময়</th>
-                        </tr>
+                <table class="table table-dark table-hover">
+                    <thead class="table-success">
+                        <tr><th>র‍্যাঙ্ক</th><th>নাম</th><th>বিভাগ</th><th>স্কোর</th><th>সময়</th></tr>
                     </thead>
                     <tbody id="rankBody"></tbody>
                 </table>
             </div>
-            <div class="text-center mt-4">
-                <button class="btn btn-outline-light" onclick="location.reload()">হোমে ফিরুন</button>
-            </div>
+            <div class="text-center mt-4"><button class="btn btn-outline-light" onclick="showSection('home')">ফিরে যান</button></div>
         </div>
     </div>
 
@@ -182,21 +88,16 @@
 
 <script>
     let questions = [];
-    let timerInterval;
-    let startTime;
+    let timerInterval, startTime;
     const TOTAL_TIME = 8 * 60;
 
-    // --- SSE Setup for Instant Updates ---
+    // SSE for Live Updates
     const evtSource = new EventSource("/api/events");
-    evtSource.onmessage = function(event) {
-        const data = JSON.parse(event.data);
-        renderLeaderboard(data);
-    };
+    evtSource.onmessage = (e) => renderLeaderboard(JSON.parse(e.data));
 
     function showSection(id) {
-        document.querySelectorAll('#home, #registration, #quiz, #result, #ranking').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('#home, #registration, #quiz, #ranking').forEach(el => el.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
-        window.scrollTo(0,0);
     }
 
     // Load Questions
@@ -204,28 +105,32 @@
         questions = data;
         const container = document.getElementById('questionsContainer');
         questions.forEach((q, i) => {
-            const html = `
-                <div class="question-box glass-card mb-4 animate__animated animate__fadeInUp" style="animation-delay: ${i*0.1}s">
-                    <h5 class="mb-3 text-warning">প্রশ্ন ${i+1}: ${q.q}</h5>
+            container.innerHTML += `
+                <div class="question-box glass mb-4">
+                    <h5 class="text-warning">প্রশ্ন ${i+1}: ${q.q}</h5>
                     <div class="row g-2">
                         ${q.options.map((opt, idx) => `
                             <div class="col-md-6">
-                                <label class="p-3 w-100 rounded option-container d-block">
-                                    <input type="radio" name="q${i}" value="${idx}" class="me-2"> ${opt}
+                                <label class="option-container">
+                                    <input type="radio" name="q${i}" value="${idx}"> ${opt}
                                 </label>
                             </div>
                         `).join('')}
                     </div>
                 </div>`;
-            container.innerHTML += html;
         });
     });
 
-    // Registration and Start
     document.getElementById('regForm').onsubmit = (e) => {
         e.preventDefault();
-        localStorage.setItem('qName', document.getElementById('userName').value);
-        localStorage.setItem('qDept', document.getElementById('userDept').value);
+        const email = document.getElementById('userEmail').value;
+        if(localStorage.getItem('quiz_done_' + email)) {
+            Swal.fire("দুঃখিত!", "আপনি ইতিমধ্যে একবার অংশ নিয়েছেন।", "error");
+            return;
+        }
+        localStorage.setItem('temp_name', document.getElementById('userName').value);
+        localStorage.setItem('temp_email', email);
+        localStorage.setItem('temp_dept', document.getElementById('userDept').value);
         startTime = Date.now();
         showSection('quiz');
         startTimer();
@@ -234,8 +139,7 @@
     function startTimer() {
         let timeLeft = TOTAL_TIME;
         timerInterval = setInterval(() => {
-            const m = Math.floor(timeLeft / 60);
-            const s = timeLeft % 60;
+            const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
             document.getElementById('timer').innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
             if (timeLeft <= 0) submitQuiz();
             timeLeft--;
@@ -243,50 +147,63 @@
     }
 
     function confirmSubmit() {
-        if(confirm("আপনি কি নিশ্চিতভাবে কুইজ জমা দিতে চান?")) submitQuiz();
+        Swal.fire({
+            title: 'আপনি কি নিশ্চিত?',
+            text: "একবার সাবমিট করলে আর পরিবর্তন করা যাবে না!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#14532d',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'হ্যাঁ, সাবমিট করুন'
+        }).then((result) => { if (result.isConfirmed) submitQuiz(); });
     }
 
     async function submitQuiz() {
         clearInterval(timerInterval);
-        let score = 0, correct = 0, wrong = 0;
-        
+        let score = 0;
         questions.forEach((q, i) => {
-            const selected = document.querySelector(`input[name="q${i}"]:checked`);
-            if (selected) {
-                if (parseInt(selected.value) === q.ans) { score++; correct++; }
-                else { score -= 0.25; wrong++; }
+            const sel = document.querySelector(`input[name="q${i}"]:checked`);
+            if (sel) {
+                if (parseInt(sel.value) === q.ans) score++;
+                else score -= 0.25;
             }
         });
 
         const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-        
-        const payload = {
-            name: localStorage.getItem('qName'),
-            dept: localStorage.getItem('qDept'),
-            score: score,
-            time_sec: timeTaken
-        };
+        const email = localStorage.getItem('temp_email');
 
-        document.getElementById('finalScore').innerText = score.toFixed(2);
-        document.getElementById('resCorrect').innerText = correct;
-        document.getElementById('resWrong').innerText = wrong;
-        document.getElementById('resTime').innerText = `${Math.floor(timeTaken/60)}:${timeTaken%60}`;
-
-        await fetch('/api/submit', {
+        const res = await fetch('/api/submit', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+                name: localStorage.getItem('temp_name'),
+                email: email,
+                dept: localStorage.getItem('temp_dept'),
+                score: score,
+                time_sec: timeTaken
+            })
         });
 
-        showSection('result');
+        const result = await res.json();
+
+        if(result.status === "success") {
+            localStorage.setItem('quiz_done_' + email, true);
+            Swal.fire({
+                title: 'অভিনন্দন!',
+                text: `আপনার স্কোর: ${score.toFixed(2)} | সময়: ${Math.floor(timeTaken/60)} মিনিট`,
+                icon: 'success',
+                confirmButtonText: 'লিডারবোর্ড দেখুন'
+            }).then(() => showSection('ranking'));
+        } else {
+            Swal.fire("ভুল!", result.message || "সাবমিট করতে সমস্যা হয়েছে", "error").then(() => showSection('home'));
+        }
     }
 
     function renderLeaderboard(data) {
-        const tbody = document.getElementById('rankBody');
-        tbody.innerHTML = data.map((item, i) => `
-            <tr class="${i < 3 ? 'rank-top' : ''}">
+        document.getElementById('rankBody').innerHTML = data.map((item, i) => `
+            <tr class="${i < 3 ? 'table-warning text-dark' : ''}">
                 <td>${i+1}</td>
-                <td class="fw-bold text-warning">${item.name}</td>
+                <td>${item.name}</td>
                 <td>${item.dept}</td>
                 <td class="fw-bold">${item.score.toFixed(2)}</td>
                 <td>${item.time_display}</td>
@@ -294,7 +211,5 @@
         `).join('');
     }
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

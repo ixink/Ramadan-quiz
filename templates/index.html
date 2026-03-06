@@ -6,7 +6,7 @@
   <title>প্রোডাক্টিভ রমাদান ২.০ কুইজ প্রতিযোগিতা | DIU</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -66,7 +66,7 @@
       font-weight: 500;
     }
 
-    input, textarea {
+    input {
       width: 100%;
       padding: 12px;
       border-radius: 8px;
@@ -85,6 +85,7 @@
       border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
+      transition: background 0.2s;
     }
 
     button:hover {
@@ -95,13 +96,13 @@
       background: var(--ramadan-gold);
       color: #0f172a;
       font-size: 1.4rem;
-      padding: 16px 48px;
+      padding: 18px 60px;
       margin: 2rem auto;
       display: block;
     }
 
     .timer {
-      font-size: 2.6rem;
+      font-size: 2.8rem;
       font-weight: bold;
       color: var(--ramadan-gold);
       text-align: center;
@@ -178,6 +179,33 @@
       font-size: 1.3rem;
     }
 
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+      background: #0f172a;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 14px;
+      text-align: right;
+    }
+
+    th {
+      background: var(--ramadan-green);
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .highlight-1 { background: rgba(212,160,23,0.15); }
+    .highlight-2 { background: rgba(203,213,225,0.12); }
+    .highlight-3 { background: rgba(156,163,175,0.12); }
+
     .section-title {
       color: var(--ramadan-gold);
       border-bottom: 2px solid var(--ramadan-gold);
@@ -240,7 +268,7 @@
     </form>
   </div>
 
-  <!-- Quiz - All questions visible -->
+  <!-- Quiz - All questions on one page -->
   <div id="quiz" class="card hidden">
     <div class="timer" id="timer">সময় বাকি: ০৮:০০</div>
 
@@ -289,6 +317,7 @@
       </thead>
       <tbody id="rankBody"></tbody>
     </table>
+
     <div style="text-align:center; margin-top:2.5rem;">
       <button onclick="show('home')">হোমে ফিরুন</button>
     </div>
@@ -305,14 +334,16 @@ let timerInterval;
 let startTime;
 
 // ──────────────────────────────────────────────
-// Show section
+// Show / hide sections
 // ──────────────────────────────────────────────
 function show(id) {
   document.querySelectorAll('#home, #registration, #quiz, #result, #ranking')
     .forEach(el => el.classList.add('hidden'));
   document.getElementById(id).classList.remove('hidden');
 
-  if (id === 'ranking') loadLeaderboard();
+  if (id === 'ranking') {
+    loadLeaderboard();
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -325,8 +356,8 @@ fetch('/api/questions')
     renderAllQuestions();
   })
   .catch(err => {
-    console.error(err);
-    alert("প্রশ্ন লোড করতে সমস্যা। পেজ রিফ্রেশ করুন।");
+    console.error("Failed to load questions:", err);
+    alert("প্রশ্ন লোড করতে সমস্যা হয়েছে। পেজ রিফ্রেশ করুন।");
   });
 
 // ──────────────────────────────────────────────
@@ -363,7 +394,7 @@ function renderAllQuestions() {
 }
 
 // ──────────────────────────────────────────────
-// Start timer & auto-submit after 8 min
+// Start 8-minute timer with auto-submit
 // ──────────────────────────────────────────────
 function startTimer() {
   let timeLeft = 8 * 60;
@@ -388,7 +419,7 @@ function startTimer() {
 }
 
 // ──────────────────────────────────────────────
-// Submit function (manual or timeout)
+// Submit answers (manual or timeout)
 // ──────────────────────────────────────────────
 async function submitQuiz(timeout = false) {
   clearInterval(timerInterval);
@@ -427,7 +458,7 @@ async function submitQuiz(timeout = false) {
   try {
     await fetch('/api/submit', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
   } catch (e) {
@@ -464,18 +495,18 @@ async function loadLeaderboard() {
       tbody.appendChild(tr);
     });
   } catch (e) {
-    console.error('Leaderboard failed:', e);
+    console.error('Leaderboard load failed:', e);
   }
 }
 
 // ──────────────────────────────────────────────
-// Events
+// Event listeners
 // ──────────────────────────────────────────────
 document.getElementById('regForm').addEventListener('submit', e => {
   e.preventDefault();
 
-  const name  = document.getElementById('name').value.trim();
-  const dept  = document.getElementById('dept').value.trim();
+  const name = document.getElementById('name').value.trim();
+  const dept = document.getElementById('dept').value.trim();
   const email = document.getElementById('email').value.trim();
 
   if (!name || !dept || !email) {
@@ -496,6 +527,7 @@ document.getElementById('submitBtn').addEventListener('click', () => {
   }
 });
 
+// Initial view
 show('home');
 </script>
 </body>

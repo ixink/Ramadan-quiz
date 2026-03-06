@@ -35,7 +35,6 @@ def save_and_broadcast():
             with open(LEADERBOARD_FILE, 'w', encoding='utf-8') as f:
                 json.dump(leaderboard, f, ensure_ascii=False, indent=2)
             
-            # Broadcast to all SSE clients
             msg = json.dumps(leaderboard)
             for client in list(clients):
                 try:
@@ -45,7 +44,6 @@ def save_and_broadcast():
         except Exception as e:
             print(f"Sync Error: {e}")
 
-# Load on startup
 load_data()
 
 QUESTIONS = [
@@ -84,14 +82,22 @@ def get_questions():
 def submit_score():
     global leaderboard
     data = request.get_json()
+    email = data.get('email', '').strip().lower()
+
+    # --- Duplicate Check ---
+    with leaderboard_lock:
+        if any(user.get('email') == email for user in leaderboard):
+            return jsonify({"status": "exists", "message": "আপনি ইতিমধ্যে একবার অংশগ্রহণ করেছেন!"}), 400
+
     try:
         new_entry = {
             "name": data.get('name', 'Anonymous'),
             "dept": data.get('dept', '-'),
+            "email": email,
             "score": float(data.get('score', 0)),
             "time_sec": int(data.get('time_sec', 0)),
             "time_display": f"{int(data.get('time_sec', 0)) // 60:02d}:{int(data.get('time_sec', 0)) % 60:02d}",
-            "submitted_at": datetime.now().strftime("%H:%M:%S")
+            "submitted_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         leaderboard.append(new_entry)
         save_and_broadcast()
@@ -118,4 +124,4 @@ def sse_events():
     return Response(generate(), mimetype='text/event-stream')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000)
